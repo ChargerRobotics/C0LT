@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
-  
+
   /* DRIVETRAIN */
 /***********************************************************************************************************************************************/
     // INSTANTIATE LEFT MOTORS AND LEFT DRIVE
@@ -94,29 +94,91 @@ public class Robot extends TimedRobot {
 /***********************************************************************************************************************************************/
 
 @Override
+  // RUNS WHEN ROBOTS STARTS
   public void robotInit() {
+    // START COMPRESSOR
+    compressor.start();
   }
-
+  // RUNS ONCE WHEN AUTONOMOUS STARTS
   @Override
   public void autonomousInit() {
   }
-
+  // RUNS DURING AUTONOMOUS
   @Override
   public void autonomousPeriodic() {
   }
-
+  // RUNS ONCE WHEN TELEOP STARTS
   @Override
   public void teleopInit() {
   }
-
+  // RUNS DURING TELEOP
   @Override
   public void teleopPeriodic() {
-  }
 
+  /* DRIVETRAIN */
+/***********************************************************************************************************************************************/
+    // SETS VARIABLES AS AXES ON CONTROLLER
+    double leftY = controller.getRawAxis(leftStickY);
+    double rightY = controller.getRawAxis(rightStickY);
+    double rightTrig = controller.getRawAxis(rightTrigger);
+
+    // READS TRIGGER VALUES TO ADJUST SPEED OF DRIVETRAIN
+    if (rightTrig > .5) {
+      leftY = leftY*.9;
+      rightY = rightY*.9;
+    } else {
+      leftY = leftY*.7;
+      rightY = rightY*.7;
+    }
+
+    // SETS DRIVETRAIN TO AXES
+    driveTrain.tankDrive(leftStickY, rightStickY);
+/***********************************************************************************************************************************************/
+
+  /* INTAKE */
+/***********************************************************************************************************************************************/
+    // SETS BOOLEAN AS BUMPER
+    boolean leftBump = leftBumper.get();
+
+    // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
+    if(leftBump == true) {
+      intakeMotor.set(.4);
+    } else {
+      intakeMotor.set(0);
+    }
+/***********************************************************************************************************************************************/
+
+  /* LOADER */
+/***********************************************************************************************************************************************/
+    // SETS BOOLEAN AS ABUTTON
+    boolean aBtn = aButton.get();
+
+    // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
+    if(aBtn == true) {
+      storageMotor.set(.3);
+    } else {
+      storageMotor.set(0);
+    }
+/***********************************************************************************************************************************************/
+
+  /* SHOOTER */
+/***********************************************************************************************************************************************/
+    // SETS BOOLEAN AS RIGHT BUMPER
+    boolean rightBump = rightBumper.get();
+
+    // READ LEFTBUMPER TO ACTIVATE SHOOTER
+    if(rightBump == true) {
+      shooter.tankDrive(1, 1);
+    } else {
+      shooter.tankDrive(0, 0);
+    }
+/***********************************************************************************************************************************************/
+  }
+  // RUNS ONCE WHEN TEST STARTS
   @Override
   public void testInit() {
   }
-
+  // RUNS DURING TEST
   @Override
   public void testPeriodic() {
   }
