@@ -8,32 +8,31 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.PWMTalonSRX;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
 
   /* DRIVETRAIN */
 /***********************************************************************************************************************************************/
     // INSTANTIATE LEFT MOTORS AND LEFT DRIVE
-    public PWMVictorSPX frontLeftMotor = new PWMVictorSPX(1);
-    public PWMVictorSPX backLeftMotor = new PWMVictorSPX(2);
+    public SpeedController frontLeftMotor = new PWMVictorSPX(1);
+    public SpeedController backLeftMotor = new PWMVictorSPX(2);
     public SpeedControllerGroup leftDrive = new SpeedControllerGroup(frontLeftMotor, backLeftMotor);
   
     // INSTANTIATE RIGHT MOTORS AND RIGHT DRIVE
-    public PWMVictorSPX frontRightMotor = new PWMVictorSPX(3);
-    public PWMVictorSPX backRightMotor = new PWMVictorSPX(4);
+    public SpeedController frontRightMotor = new PWMVictorSPX(3);
+    public SpeedController backRightMotor = new PWMVictorSPX(4);
     public SpeedControllerGroup rightDrive = new SpeedControllerGroup(frontRightMotor, backRightMotor);
-
-    // INSTANTIATE DRIVETRAIN
-    public DifferentialDrive driveTrain = new DifferentialDrive(leftDrive, rightDrive);
 /***********************************************************************************************************************************************/
 
   /* INTAKE, STORAGE, LOADER, LATCH, AND FORTUNE */
@@ -42,26 +41,25 @@ public class Robot extends TimedRobot {
     public PWMVictorSPX intakeMotor = new PWMVictorSPX(7);
 
     // INSTANTIATE STORAGE MOTOR
-    public PWMTalonSRX storageMotor = new PWMTalonSRX(8);
+    public PWMVictorSPX storageMotor = new PWMVictorSPX(6);
   
     // INSTANTIATE LATCH MOTOR
-    public PWMVictorSPX latchMotor = new PWMVictorSPX(100);
+    //public PWMVictorSPX latchMotor = new PWMVictorSPX(15);
 
     // INSTANTIATE FORTUNE MOTOR
-    public PWMVictorSPX fortuneMotor = new PWMVictorSPX(100);
+    //public PWMVictorSPX fortuneMotor = new PWMVictorSPX(16);
 /***********************************************************************************************************************************************/
 
   /* SHOOTER AND LIFT */
 /***********************************************************************************************************************************************/
     // INSTANTIATE SHOOTER MOTORS AND SHOOTER
-    public PWMSpeedController rightShooterMotor = new PWMVictorSPX(5);
-    public PWMSpeedController leftShooterMotor = new PWMTalonSRX(6);
-    public DifferentialDrive shooter = new DifferentialDrive(leftShooterMotor, rightShooterMotor);
+    public PWMSpeedController leftShooterMotor = new PWMVictorSPX(5);
+    public PWMSpeedController rightShooterMotor = new Talon(8);
 
     // INSTANTIATE LIFT MOTORS AND LIFT
-    public PWMSpeedController leftLiftMotor = new PWMVictorSPX(0);
-    public PWMSpeedController rightLiftMotor = new PWMTalonSRX(9);
-    public DifferentialDrive lift = new DifferentialDrive(leftShooterMotor, rightShooterMotor);
+    //public PWMSpeedController leftLiftMotor = new PWMVictorSPX(0);
+    //public PWMSpeedController rightLiftMotor = new PWMTalonSRX(9);
+    //public DifferentialDrive lift = new DifferentialDrive(leftShooterMotor, rightShooterMotor);
 /***********************************************************************************************************************************************/
 
   /* CONTROLLER */
@@ -90,14 +88,21 @@ public class Robot extends TimedRobot {
     public Compressor compressor = new Compressor();
 
     // INSTANTIATE LOADER SOLENOID
-    public Solenoid loader = new Solenoid(2,3);
+    public DoubleSolenoid loader = new DoubleSolenoid(0, 1);
 /***********************************************************************************************************************************************/
 
 @Override
   // RUNS WHEN ROBOTS STARTS
   public void robotInit() {
-    // START COMPRESSOR
-    compressor.start();
+    // TURN OFF ALL MOTORS
+    leftDrive.set(0);
+    rightDrive.set(0);
+    leftShooterMotor.set(0);
+    rightShooterMotor.set(0);
+    
+    // RESETS PISTON POSITIONS
+    loader.set(Value.kReverse);
+    compressor.clearAllPCMStickyFaults();
   }
   // RUNS ONCE WHEN AUTONOMOUS STARTS
   @Override
@@ -131,8 +136,9 @@ public class Robot extends TimedRobot {
       rightY = rightY*.7;
     }
 
-    // SETS DRIVETRAIN TO AXES
-    driveTrain.tankDrive(leftStickY, rightStickY);
+    // SETS DRIVE SIDES TO AXES
+    leftDrive.set(-leftY);
+    rightDrive.set(rightY);
 /***********************************************************************************************************************************************/
 
   /* INTAKE */
@@ -142,7 +148,7 @@ public class Robot extends TimedRobot {
 
     // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
     if(leftBump == true) {
-      intakeMotor.set(.4);
+      intakeMotor.set(.9);
     } else {
       intakeMotor.set(0);
     }
@@ -153,9 +159,9 @@ public class Robot extends TimedRobot {
     // SETS BOOLEAN AS ABUTTON
     boolean aBtn = aButton.get();
 
-    // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
+    // READ LEFTBUMPER TO ACTIVATE LOADER MOTOR
     if(aBtn == true) {
-      storageMotor.set(.3);
+      storageMotor.set(-.4);
     } else {
       storageMotor.set(0);
     }
@@ -168,11 +174,27 @@ public class Robot extends TimedRobot {
 
     // READ LEFTBUMPER TO ACTIVATE SHOOTER
     if(rightBump == true) {
-      shooter.tankDrive(1, 1);
+      leftShooterMotor.set(1);
+      rightShooterMotor.set(1);
     } else {
-      shooter.tankDrive(0, 0);
+      leftShooterMotor.set(0);
+      rightShooterMotor.set(0);
     }
 /***********************************************************************************************************************************************/
+
+/* PNEUMATICS */
+/**********************************************************************************************************************************************/
+    // SETS BOOLEAN AS XBUTTON
+    boolean xBtn = xButton.get();
+    
+    // READS X BUTTON TO FIRE SOLENOID
+    if(xBtn == true) {
+      loader.set(Value.kForward);
+    } else { 
+      loader.set(Value.kReverse);
+    }
+/***********************************************************************************************************************************************/
+
   }
   // RUNS ONCE WHEN TEST STARTS
   @Override
