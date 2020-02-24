@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.PWMTalonSRX;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -25,13 +24,13 @@ public class Robot extends TimedRobot {
   /* DRIVETRAIN */
 /***********************************************************************************************************************************************/
     // INSTANTIATE LEFT MOTORS AND LEFT DRIVE
-    public SpeedController frontLeftMotor = new PWMVictorSPX(1);
-    public SpeedController backLeftMotor = new PWMVictorSPX(2);
+    public SpeedController frontLeftMotor = new PWMVictorSPX(3);
+    public SpeedController backLeftMotor = new PWMVictorSPX(4);
     public SpeedControllerGroup leftDrive = new SpeedControllerGroup(frontLeftMotor, backLeftMotor);
   
     // INSTANTIATE RIGHT MOTORS AND RIGHT DRIVE
-    public SpeedController frontRightMotor = new PWMVictorSPX(3);
-    public SpeedController backRightMotor = new PWMVictorSPX(4);
+    public SpeedController frontRightMotor = new PWMVictorSPX(5);
+    public SpeedController backRightMotor = new PWMVictorSPX(6);
     public SpeedControllerGroup rightDrive = new SpeedControllerGroup(frontRightMotor, backRightMotor);
 /***********************************************************************************************************************************************/
 
@@ -41,25 +40,25 @@ public class Robot extends TimedRobot {
     public PWMVictorSPX intakeMotor = new PWMVictorSPX(7);
 
     // INSTANTIATE STORAGE MOTOR
-    public PWMVictorSPX storageMotor = new PWMVictorSPX(6);
+    public PWMVictorSPX storageMotor = new PWMVictorSPX(1);
   
     // INSTANTIATE LATCH MOTOR
-    //public PWMVictorSPX latchMotor = new PWMVictorSPX(15);
+    /*public PWMVictorSPX latchMotor = new PWMVictorSPX(#);
 
     // INSTANTIATE FORTUNE MOTOR
-    //public PWMVictorSPX fortuneMotor = new PWMVictorSPX(16);
+    /*public PWMVictorSPX fortuneMotor = new PWMVictorSPX(#);
 /***********************************************************************************************************************************************/
 
   /* SHOOTER AND LIFT */
 /***********************************************************************************************************************************************/
     // INSTANTIATE SHOOTER MOTORS AND SHOOTER
-    public PWMSpeedController leftShooterMotor = new PWMVictorSPX(5);
-    public PWMSpeedController rightShooterMotor = new Talon(8);
+    public PWMSpeedController leftShooterMotor = new PWMVictorSPX(0);
+    public PWMSpeedController rightShooterMotor = new PWMTalonSRX(2);
 
     // INSTANTIATE LIFT MOTORS AND LIFT
-    //public PWMSpeedController leftLiftMotor = new PWMVictorSPX(0);
-    //public PWMSpeedController rightLiftMotor = new PWMTalonSRX(9);
-    //public DifferentialDrive lift = new DifferentialDrive(leftShooterMotor, rightShooterMotor);
+    /*public PWMSpeedController leftLiftMotor = new PWMVictorSPX(#);
+    public PWMSpeedController rightLiftMotor = new PWMVictorSPX(#);
+    public DifferentialDrive lift = new DifferentialDrive(leftShooterMotor, rightShooterMotor);
 /***********************************************************************************************************************************************/
 
   /* CONTROLLER */
@@ -88,34 +87,40 @@ public class Robot extends TimedRobot {
     public Compressor compressor = new Compressor();
 
     // INSTANTIATE LOADER SOLENOID
-    public DoubleSolenoid loader = new DoubleSolenoid(0, 1);
+    public DoubleSolenoid loader = new DoubleSolenoid(1, 0);
 /***********************************************************************************************************************************************/
 
 @Override
   // RUNS WHEN ROBOTS STARTS
   public void robotInit() {
+
     // TURN OFF ALL MOTORS
     leftDrive.set(0);
     rightDrive.set(0);
     leftShooterMotor.set(0);
     rightShooterMotor.set(0);
     
-    // RESETS PISTON POSITIONS
+    // RESET PNEUMATIC
     loader.set(Value.kReverse);
     compressor.clearAllPCMStickyFaults();
+
   }
+
   // RUNS ONCE WHEN AUTONOMOUS STARTS
   @Override
   public void autonomousInit() {
   }
+
   // RUNS DURING AUTONOMOUS
   @Override
   public void autonomousPeriodic() {
   }
+
   // RUNS ONCE WHEN TELEOP STARTS
   @Override
   public void teleopInit() {
   }
+
   // RUNS DURING TELEOP
   @Override
   public void teleopPeriodic() {
@@ -129,11 +134,23 @@ public class Robot extends TimedRobot {
 
     // READS TRIGGER VALUES TO ADJUST SPEED OF DRIVETRAIN
     if (rightTrig > .5) {
-      leftY = leftY*.9;
-      rightY = rightY*.9;
+      leftY = leftY*.95;
+      rightY = rightY*.95;
     } else {
-      leftY = leftY*.7;
-      rightY = rightY*.7;
+      leftY = leftY*.65;
+      rightY = rightY*.65;
+    }
+
+    // GETS RID OF CONTROLLER DRIFT
+    if (leftY < .05) {
+      if (leftY > -.05) {
+        leftY = 0;
+      }
+    }
+    if (rightY < .05) {
+      if (rightY > -.05) {
+        rightY = 0;
+      }
     }
 
     // SETS DRIVE SIDES TO AXES
@@ -148,7 +165,7 @@ public class Robot extends TimedRobot {
 
     // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
     if(leftBump == true) {
-      intakeMotor.set(.9);
+      intakeMotor.set(.4);
     } else {
       intakeMotor.set(0);
     }
@@ -194,12 +211,13 @@ public class Robot extends TimedRobot {
       loader.set(Value.kReverse);
     }
 /***********************************************************************************************************************************************/
-
   }
+
   // RUNS ONCE WHEN TEST STARTS
   @Override
   public void testInit() {
   }
+  
   // RUNS DURING TEST
   @Override
   public void testPeriodic() {
