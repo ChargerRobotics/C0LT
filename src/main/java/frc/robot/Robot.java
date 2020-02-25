@@ -43,10 +43,10 @@ public class Robot extends TimedRobot {
     public PWMVictorSPX storageMotor = new PWMVictorSPX(1);
   
     // INSTANTIATE LATCH MOTOR
-    /*public PWMVictorSPX latchMotor = new PWMVictorSPX(#);
+    /*public PWMVictorSPX latchMotor = new PWMVictorSPX(#);*/
 
     // INSTANTIATE FORTUNE MOTOR
-    /*public PWMVictorSPX fortuneMotor = new PWMVictorSPX(#);
+    public PWMVictorSPX fortuneMotor = new PWMVictorSPX(8);
 /***********************************************************************************************************************************************/
 
   /* SHOOTER AND LIFT */
@@ -88,6 +88,9 @@ public class Robot extends TimedRobot {
 
     // INSTANTIATE LOADER SOLENOID
     public DoubleSolenoid loader = new DoubleSolenoid(1, 0);
+
+    // INSTANTIATE FORTUNE SOLENOID
+    public DoubleSolenoid fortune = new DoubleSolenoid(3, 2);
 /***********************************************************************************************************************************************/
 
 @Override
@@ -102,7 +105,9 @@ public class Robot extends TimedRobot {
     
     // RESET PNEUMATIC
     loader.set(Value.kReverse);
+    fortune.set(Value.kReverse);
     compressor.clearAllPCMStickyFaults();
+    compressor.start();
 
   }
 
@@ -178,9 +183,22 @@ public class Robot extends TimedRobot {
 
     // READ LEFTBUMPER TO ACTIVATE LOADER MOTOR
     if(aBtn == true) {
-      storageMotor.set(-.4);
+      storageMotor.set(-.6);
     } else {
       storageMotor.set(0);
+    }
+/***********************************************************************************************************************************************/
+
+    /* FORTUNE */
+/***********************************************************************************************************************************************/
+    // SETS BOOLEAN AS BBUTTON
+    boolean yBtn = yButton.get();
+
+    // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
+    if(yBtn == true) {
+      fortuneMotor.set(.6);
+    } else {
+      fortuneMotor.set(0);
     }
 /***********************************************************************************************************************************************/
 
@@ -204,11 +222,18 @@ public class Robot extends TimedRobot {
     // SETS BOOLEAN AS XBUTTON
     boolean xBtn = xButton.get();
     
-    // READS X BUTTON TO FIRE SOLENOID
+    // READS XBUTTON TO FIRE LOADER PISTON
     if(xBtn == true) {
       loader.set(Value.kForward);
     } else { 
       loader.set(Value.kReverse);
+    }
+
+    // READ YBUTTON TO FIRE FORTUNE PISTON
+    if(yBtn == true) {
+      fortune.set(Value.kForward);
+    } else {
+      fortune.set(Value.kReverse);
     }
 /***********************************************************************************************************************************************/
   }
