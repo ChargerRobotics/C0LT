@@ -7,16 +7,21 @@
 
 package frc.robot;
 
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.PWMTalonSRX;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 public class Robot extends TimedRobot {
@@ -91,6 +96,9 @@ public class Robot extends TimedRobot {
 
     // INSTANTIATE FORTUNE SOLENOID
     public DoubleSolenoid fortune = new DoubleSolenoid(3, 2);
+
+    // INSTANTIATE LIMELIGHT TABLE
+    public NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
 /***********************************************************************************************************************************************/
 
 @Override
@@ -103,12 +111,13 @@ public class Robot extends TimedRobot {
     leftShooterMotor.set(0);
     rightShooterMotor.set(0);
     
-    // RESET PNEUMATIC
+    // RESET PNEUMATICS
     loader.set(Value.kReverse);
     fortune.set(Value.kReverse);
     compressor.clearAllPCMStickyFaults();
-    compressor.start();
 
+    // TURN LIMELIGHT OFF
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
   }
 
   // RUNS ONCE WHEN AUTONOMOUS STARTS
@@ -191,7 +200,7 @@ public class Robot extends TimedRobot {
 
     /* FORTUNE */
 /***********************************************************************************************************************************************/
-    // SETS BOOLEAN AS BBUTTON
+    // SETS BOOLEAN AS YBUTTON
     boolean yBtn = yButton.get();
 
     // READ LEFTBUMPER TO ACTIVATE INTAKE MOTOR
@@ -209,15 +218,15 @@ public class Robot extends TimedRobot {
 
     // READ LEFTBUMPER TO ACTIVATE SHOOTER
     if(rightBump == true) {
-      leftShooterMotor.set(1);
-      rightShooterMotor.set(1);
+      leftShooterMotor.set(0.95);
+      rightShooterMotor.set(0.95);
     } else {
       leftShooterMotor.set(0);
       rightShooterMotor.set(0);
     }
 /***********************************************************************************************************************************************/
 
-/* PNEUMATICS */
+  /* PNEUMATICS */
 /**********************************************************************************************************************************************/
     // SETS BOOLEAN AS XBUTTON
     boolean xBtn = xButton.get();
@@ -236,6 +245,65 @@ public class Robot extends TimedRobot {
       fortune.set(Value.kReverse);
     }
 /***********************************************************************************************************************************************/
+
+    /* LIMELIGHT */
+/***********************************************************************************************************************************************/
+    // UPDATE NETWORKTABLES
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableEntry tx = table.getEntry("tx");
+    NetworkTableEntry ty = table.getEntry("ty");
+    NetworkTableEntry ta = table.getEntry("ta");
+
+    // SET VARIABLES
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
+
+    double leftTrig = controller.getRawAxis(leftTrigger);
+    
+    if (leftTrig > .1) {
+      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+      if (leftTrig < .7) {
+        if (y < 0) {
+          leftDrive.set(.5);
+          rightDrive.set(-.5);
+          if (y > -.1) {
+            rightDrive.set(0);
+            leftDrive.set(0);
+          }
+        }
+        if (y > 0) {
+          leftDrive.set(-.5);
+          rightDrive.set(.5);
+          if (y < .1) {
+            rightDrive.set(0);
+            leftDrive.set(0);
+          }
+        }
+      } else {
+        if (x < 0) {
+          leftDrive.set(0);
+          rightDrive.set(-.2);
+          if (x > -.1) {
+            rightDrive.set(0);
+          }
+        }
+        if (x > 0) {
+          rightDrive.set(0);
+          leftDrive.set(.2);
+          if (x < .1) {
+            leftDrive.set(0);
+          }
+        }
+      }
+    } else {
+      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+      leftDrive.set(-leftY);
+      rightDrive.set(rightY);
+    }
+/***********************************************************************************************************************************************/
+
+
   }
 
   // RUNS ONCE WHEN TEST STARTS
