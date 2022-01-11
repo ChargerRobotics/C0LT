@@ -28,8 +28,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
-public class Robot extends TimedRobot {
-
+public class Robot extends TimedRobot 
+{
   /* DRIVETRAIN */
   /***********************************************************************************************************************************************/
   // INSTANTIATE LEFT MOTORS AND LEFT DRIVE
@@ -97,12 +97,14 @@ public class Robot extends TimedRobot {
   public final I2C.Port i2cPort = I2C.Port.kOnboard;
   public ColorSensorV3 indexer = new ColorSensorV3(i2cPort);
 
+  // DECLARE TIMER VARIABLE
   public int timerNumber;
   /***********************************************************************************************************************************************/
 
-  @Override
   // RUNS WHEN ROBOTS STARTS
-  public void robotInit() {
+  @Override
+  public void robotInit() 
+  {
 
     // TURN OFF ALL MOTORS
     leftDrive.set(0);
@@ -130,10 +132,13 @@ public class Robot extends TimedRobot {
 
   // RUNS ONCE WHEN AUTONOMOUS STARTS
   @Override
-  public void autonomousInit() {
+  public void autonomousInit() 
+  {
+    // DEACTIVATE MOTORS
     storageMotor.set(0);
     leftShooterMotor.set(0);
     rightShooterMotor.set(0);
+
     // ACTIVIATE LIMELIGHT
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
     
@@ -153,55 +158,67 @@ public class Robot extends TimedRobot {
     long start = System.currentTimeMillis();
     long end = start + 3000;
 
-    while (System.currentTimeMillis() < end) {
+    while (System.currentTimeMillis() < end) 
+    {
       // UPDATE NETWORKTABLES
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    NetworkTableEntry tx = table.getEntry("tx");
-    NetworkTableEntry ty = table.getEntry("ty");
-    NetworkTableEntry ta = table.getEntry("ta");
+      NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+      NetworkTableEntry tx = table.getEntry("tx");
+      NetworkTableEntry ty = table.getEntry("ty");
+      NetworkTableEntry ta = table.getEntry("ta");
 
-    // SET VARIABLES
-    double x = tx.getDouble(0.0);
-    double y = ty.getDouble(0.0);
-    double area = ta.getDouble(0.0);
-    boolean backXTarget = false;
-    boolean frontXTarget = false;
-    if (x < 0) {
-      leftDrive.set(0);
-      rightDrive.set(-.17);
-      if (x > -.55) {
-        rightDrive.set(0);
-        backXTarget = true;
-      }
-    }
-    if (x > 0) {
-      rightDrive.set(0);
-      leftDrive.set(.17);
-      if (x < .65) {
+      // SET VARIABLES
+      double x = tx.getDouble(0.0);
+      double y = ty.getDouble(0.0);
+      double area = ta.getDouble(0.0);
+      boolean backXTarget = false;
+      boolean frontXTarget = false;
+
+      if (x < 0) 
+      {
         leftDrive.set(0);
-        frontXTarget = true;
+        rightDrive.set(-.17);
+        if (x > -.55) 
+        {
+          rightDrive.set(0);
+          backXTarget = true;
+        }
       }
-    }
-    if (backXTarget == true) {
-      if (frontXTarget == true) {
-        if (y < 0) {
-          leftDrive.set(.3);
-          rightDrive.set(-.3);
-          if (y > -.85) {
-            rightDrive.set(0);
-            leftDrive.set(0);
+      if (x > 0) 
+      {
+        rightDrive.set(0);
+        leftDrive.set(.17);
+        if (x < .65) 
+        {
+          leftDrive.set(0);
+          frontXTarget = true;
+        }
+      }
+      if (backXTarget == true) 
+      {
+        if (frontXTarget == true) 
+        {
+          if (y < 0) 
+          {
+            leftDrive.set(.3);
+            rightDrive.set(-.3);
+            if (y > -.85) 
+            {
+              rightDrive.set(0);
+              leftDrive.set(0);
+            }
+          }
+          if (y > 0) 
+          {
+            leftDrive.set(-.3);
+            rightDrive.set(.3);
+            if (y < .85) 
+            {
+              rightDrive.set(0);
+              leftDrive.set(0);
+            }
           }
         }
-        if (y > 0) {
-          leftDrive.set(-.3);
-          rightDrive.set(.3);
-          if (y < .85) {
-            rightDrive.set(0);
-            leftDrive.set(0);
-          }
-        }
-        }
-    } 
+      } 
     }
     rightDrive.set(0);
     leftDrive.set(0);
@@ -214,7 +231,8 @@ public class Robot extends TimedRobot {
 
   // RUNS DURING AUTONOMOUS
   @Override
-  public void autonomousPeriodic() {  
+  public void autonomousPeriodic() 
+  {  
     // LAUNCH AND RETRACT PISTON 
     loader.set(Value.kForward);
     edu.wpi.first.wpilibj.Timer.delay(.5);
@@ -230,7 +248,8 @@ public class Robot extends TimedRobot {
   
   // RUNS ONCE WHEN TELEOP STARTS
   @Override
-  public void teleopInit() {
+  public void teleopInit() 
+  {
     storageMotor.set(0);
     leftShooterMotor.set(0);
     rightShooterMotor.set(0);
@@ -239,7 +258,8 @@ public class Robot extends TimedRobot {
 
   // RUNS DURING TELEOP
   @Override
-  public void teleopPeriodic() {
+  public void teleopPeriodic() 
+  {
 
     /* DRIVETRAIN */
     /***********************************************************************************************************************************************/
@@ -249,22 +269,29 @@ public class Robot extends TimedRobot {
     double rightTrig = controller.getRawAxis(rightTrigger);
 
     // READS TRIGGER VALUES TO ADJUST SPEED OF DRIVETRAIN
-    if (rightTrig > .5) {
+    if (rightTrig > .5) 
+    {
       leftY = leftY * .95;
       rightY = rightY * .95;
-    } else {
+    } 
+    else 
+    {
       leftY = leftY * .65;
       rightY = rightY * .65;
     }
 
     // GETS RID OF CONTROLLER DRIFT
-    if (leftY < .05) {
-      if (leftY > -.05) {
+    if (leftY < .05)
+    {
+      if (leftY > -.05) 
+      {
         leftY = 0;
       }
     }
-    if (rightY < .05) {
-      if (rightY > -.05) {
+    if (rightY < .05) 
+    {
+      if (rightY > -.05) 
+      {
         rightY = 0;
       }
     }
@@ -286,36 +313,45 @@ public class Robot extends TimedRobot {
     int indexRED = indexer.getRed();
 
     // READ LEFTBUMPER TO ACTIVATE INTAKE
-    if(leftBump == true) {
+    if(leftBump == true) 
+    {
       intakeMotor.set(.35);
       storageMotor.set(.1);
 
       // IF BALL TRIGGERS SENSOR, ACTIVATE STORAGE MOTOR
-      if (indexRED > 200) { 
+      if (indexRED > 200) 
+      { 
         intakeMotor.set(.06);
         storageMotor.set(-.66);
       }
 
     // IF BUMPER NOT PRESSED, MANUALLY CONTROL INTAKE AND STORAGE MOTORS, AND SLIGHTLY REVERSE STORAGE MOTOR
-    } else {
+    } 
+    else 
+    {
       intakeMotor.set(0);
       storageMotor.set(.1);
 
-      // ABUTTON ACTIVATES STORAGE MOTOR
-      if(aBtn == true) {
+      // A_BUTTON ACTIVATES STORAGE MOTOR
+      if(aBtn == true) 
+      {
         storageMotor.set(-.3);
-        if (backBtn == true) {
+        if (backBtn == true) 
+        {
           storageMotor.set(-.7);
         }
-        if (rightTrig > .5) {
+        if (rightTrig > .5) 
+        {
           storageMotor.set(.6);
         }
       }
 
-      // BBUTTON ACTIVATES INTAKE MOTOR
-      if(bBtn == true) {
+      // B_BUTTON ACTIVATES INTAKE MOTOR
+      if(bBtn == true) 
+      {
         intakeMotor.set(.4);
-        if(rightTrig > .5) {
+        if(rightTrig > .5) 
+        {
           intakeMotor.set(-.5);
         }
       }
@@ -332,24 +368,33 @@ public class Robot extends TimedRobot {
     int dPad = controller.getPOV();
 
     // READ YBUTTON TO FIRE FORTUNE PISTON
-    if(yBtn == true) {
+    if(yBtn == true) 
+    {
       fortune.set(Value.kForward);
 
       // IF RIGHTTRIG ALSO PRESSED, RETRACT FORTUNE PISTON
-      if(rightTrig > .5) {
+      if(rightTrig > .5) 
+      {
       fortune.set(Value.kReverse);
       }
-    } else {
+    } 
+    else 
+    {
       fortune.set(Value.kOff);
     }
     
     // READ YBUTTON TO ACTIVATE FORTUNE MOTOR
     if (dPad == 270) {
       fortuneMotor.set(-.2);
-    } else {
-      if(dPad == 90) {
+    } 
+    else 
+    {
+      if(dPad == 90) 
+      {
         fortuneMotor.set(.2);
-      } else {
+      } 
+      else 
+      {
         fortuneMotor.set(0);
       }
     }
@@ -361,14 +406,18 @@ public class Robot extends TimedRobot {
     boolean rightBump = rightBumper.get();
 
     // READ LEFTBUMPER TO ACTIVATE SHOOTER
-    if(rightBump == true) {
+    if(rightBump == true) 
+    {
       leftShooterMotor.set(1);
       rightShooterMotor.set(1);
-      if (rightTrig > .5) {
+      if (rightTrig > .5) 
+      {
         leftShooterMotor.set(-.3);
         rightShooterMotor.set(-.3);
       }
-    } else {
+    } 
+    else 
+    {
       leftShooterMotor.set(0);
       rightShooterMotor.set(0);
     }
@@ -377,9 +426,12 @@ public class Robot extends TimedRobot {
     boolean xBtn = xButton.get();
     
     // READS XBUTTON TO FIRE LOADER PISTON
-    if(xBtn == true) {
+    if(xBtn == true) 
+    {
       loader.set(Value.kForward);
-    } else { 
+    } 
+    else 
+    { 
       loader.set(Value.kReverse);
     }
 /***********************************************************************************************************************************************/
@@ -399,25 +451,33 @@ public class Robot extends TimedRobot {
     double leftTrig = controller.getRawAxis(leftTrigger);
 
     // ACTIVATE LIMELIGHT WHEN TRIGGER IS PRESSED
-    if (leftTrig > .1) {
+    if (leftTrig > .1) 
+    {
       NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
-      if (leftTrig > .6) {
-        if (x < 0) {
+      if (leftTrig > .6) 
+      {
+        if (x < 0) 
+        {
           leftDrive.set(0);
           rightDrive.set(-.2);
-          if (x > -.15) {
+          if (x > -.15) 
+          {
             rightDrive.set(0);
           }
         }
-        if (x > 0) {
+        if (x > 0) 
+        {
           rightDrive.set(0);
           leftDrive.set(.2);
-          if (x < .15) {
+          if (x < .15) 
+          {
             leftDrive.set(0);
           }
         }
       }
-    } else {      
+    } 
+    else 
+    {      
       NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     }
 
@@ -464,18 +524,14 @@ public class Robot extends TimedRobot {
       rightDrive.set(rightY);
     } */
 /***********************************************************************************************************************************************/
-
-
   }
 
   // RUNS ONCE WHEN TEST STARTS
   @Override
-  public void testInit() {
-  }
+  public void testInit() {}
   
   // RUNS DURING TEST
   @Override
-  public void testPeriodic() {
-  }
+  public void testPeriodic() {}
 
 }
